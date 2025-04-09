@@ -10,7 +10,9 @@ class HumanizeTextView(APIView):
         serializer = HumanizeTextSerializer(data=request.data)
         if serializer.is_valid():
             content = serializer.validated_data['content']
-            task = humanize_text_task.delay(content)
+            detection_evasion = serializer.validated_data.get('detection_evasion', False)
+            # Pass the flag to the task
+            task = humanize_text_task.delay(content, detection_evasion)
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -25,3 +27,4 @@ class TaskStatusView(APIView):
         else:
             response = {'state': task_result.state, 'status': str(task_result.info)}
         return Response(response)
+
