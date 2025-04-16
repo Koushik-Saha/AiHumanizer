@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import HumanizeTextSerializer
 from .tasks import humanize_text_task
+from django.http import FileResponse, Http404
+from .models import Submission
+from .export_utils import generate_docx, generate_pdf
 
 class HumanizeTextView(APIView):
     def post(self, request, format=None):
@@ -27,4 +30,27 @@ class TaskStatusView(APIView):
         else:
             response = {'state': task_result.state, 'status': str(task_result.info)}
         return Response(response)
+
+class ExportSubmissionView(APIView):
+    """
+    Export a past submission as PDF or DOCX.
+    """
+    authentication_classes = [APIKeyAuthentication]
+    throttle_classes = [APIKeyThrottle]
+
+    def get(self, request, submission_id):
+        fmt = request.query_params.get('format', 'pdf').lower()
+        try:
+            submission = Submission.objects.get(id=submission_id)
+        except Submission.DoesNotExist:
+            raise Http404("Submission not found")
+
+        if fmt == 'pdf':
+            buf = generate_pdf(submission)
+            return FileResponse(buf, as_attachment=True, filename=f"submission_{submission_id}.pdf")
+        elif fmt == 'docx':
+            buf = generate_docx(submission)
+            return FileResponse(buf, as_attachment=True, filename=f"submission_{submission_id}.docx")
+        else:
+            return Response({"error": "Invalid format"}, status=400)
 
