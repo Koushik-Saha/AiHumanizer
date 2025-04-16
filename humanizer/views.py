@@ -17,7 +17,9 @@ class HumanizeTextView(APIView):
             content = serializer.validated_data['content']
             detection_evasion = serializer.validated_data['detection_evasion']
             plagiarism_check = serializer.validated_data['plagiarism_check']
-            task = humanize_text_task.delay(content, detection_evasion, plagiarism_check)
+            # extract language
+            language = serializer.validated_data.get('language', 'en')
+            task = humanize_text_task.delay(content, detection_evasion, plagiarism_check, language)
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
