@@ -1,12 +1,8 @@
-# humanizer/tasks.py
-
 from celery import shared_task
-
-from humanizer.humanizer_engine import humanize_text
-
+from .humanizer_engine import humanize_text
 
 @shared_task
-def humanize_text_task(content):
-    # Use the humanization engine to transform the text
-    result = humanize_text(content)
+def humanize_text_task(content, detection_evasion=False):
+    # Use the humanization engine with the detection evasion flag
+    result = humanize_text(content, detection_evasion)
     return result
