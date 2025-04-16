@@ -7,6 +7,8 @@ from .tasks import humanize_text_task
 from django.http import FileResponse, Http404
 from .models import Submission
 from .export_utils import generate_docx, generate_pdf
+from .serializers import SentenceEditorSerializer
+from .editor import sentence_editor
 
 class HumanizeTextView(APIView):
     def post(self, request, format=None):
@@ -53,4 +55,17 @@ class ExportSubmissionView(APIView):
             return FileResponse(buf, as_attachment=True, filename=f"submission_{submission_id}.docx")
         else:
             return Response({"error": "Invalid format"}, status=400)
+
+class SentenceEditorView(APIView):
+    """
+    Return humanized versions of each sentence for editing.
+    """
+    def post(self, request, format=None):
+        serializer = SentenceEditorSerializer(data=request.data)
+        if serializer.is_valid():
+            content = serializer.validated_data['content']
+            detection_evasion = serializer.validated_data['detection_evasion']
+            result = sentence_editor(content, detection_evasion)
+            return Response({"sentences": result}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
