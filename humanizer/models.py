@@ -8,6 +8,7 @@ class Submission(models.Model):
     plagiarism_check = models.BooleanField(default=False)
     plagiarism_score = models.IntegerField(null=True, blank=True)
     plagiarism_report_url = models.URLField(null=True, blank=True)
+    flagged = models.BooleanField(default=False)  # new field
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -26,12 +27,9 @@ class APIKey(models.Model):
     def __str__(self):
         return f"{self.name} ({self.key})"
 
-class Submission(models.Model):
-    original_content = models.TextField()
-    humanized_content = models.TextField()
-    detection_evasion = models.BooleanField(default=False)
-    plagiarism_check = models.BooleanField(default=False)
-    plagiarism_score = models.IntegerField(null=True, blank=True)
-    plagiarism_report_url = models.URLField(null=True, blank=True)
-    flagged = models.BooleanField(default=False)           # new field
+class BannedPhrase(models.Model):
+    phrase = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.phrase
