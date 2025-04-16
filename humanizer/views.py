@@ -10,9 +10,9 @@ class HumanizeTextView(APIView):
         serializer = HumanizeTextSerializer(data=request.data)
         if serializer.is_valid():
             content = serializer.validated_data['content']
-            detection_evasion = serializer.validated_data.get('detection_evasion', False)
-            # Pass the flag to the task
-            task = humanize_text_task.delay(content, detection_evasion)
+            detection_evasion = serializer.validated_data['detection_evasion']
+            plagiarism_check = serializer.validated_data['plagiarism_check']
+            task = humanize_text_task.delay(content, detection_evasion, plagiarism_check)
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
