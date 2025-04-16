@@ -51,6 +51,18 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'humanizer.authentication.APIKeyAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'humanizer.throttling.APIKeyThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'apikey': '1000/day',  # fallback rate
+    },
+}
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
