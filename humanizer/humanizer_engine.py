@@ -1,13 +1,12 @@
 import random
 
 
-def humanize_text(content):
+def humanize_text(content, detection_evasion=False):
     """
-    A basic function to simulate humanization.
-    It transforms the input text by lowercasing it, re-capitalizing the first letter,
-    and inserting a random filler phrase to give it a 'human touch'.
+    Enhance the input text to appear more human-like.
+    This function performs a basic transformation plus additional modifications if detection evasion is enabled.
     """
-    # Define a list of filler phrases
+    # Define filler phrases for natural tone
     filler_phrases = [
         "you know,",
         "indeed,",
@@ -19,20 +18,22 @@ def humanize_text(content):
     if not content:
         return ""
 
-    # Lowercase and strip extra spaces
+    # Basic humanization: lower-case, strip, and re-capitalize text
     transformed = content.lower().strip()
-
-    # Capitalize the first letter of the content
     transformed = transformed[0].upper() + transformed[1:]
 
-    # Split content into words
-    words = transformed.split()
-
     # Insert a random filler phrase after the third word if possible
+    words = transformed.split()
     if len(words) > 3:
         filler = random.choice(filler_phrases)
         words.insert(3, filler)
 
-    # Rebuild the string
     humanized_output = " ".join(words)
+
+    # Additional modifications for detection evasion mode
+    if detection_evasion:
+        # For demonstration, append a phrase; in a real system, you could implement synonym substitution or restructuring.
+        evasion_phrase = "bypassed-detector"
+        humanized_output += f" {evasion_phrase}"
+
     return humanized_output
