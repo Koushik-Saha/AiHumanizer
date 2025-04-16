@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HumanizeTextView, TaskStatusView, ExportSubmissionView
+from .views import HumanizeTextView, TaskStatusView, ExportSubmissionView, SentenceEditorView
 
 urlpatterns = [
     # Submit text for humanization (returns task_id)
@@ -9,5 +9,7 @@ urlpatterns = [
     path('task-status/<str:task_id>/', TaskStatusView.as_view(), name='task-status'),
 
     path('export/<int:submission_id>/', ExportSubmissionView.as_view(), name='export-submission'),
+
+    path('sentence-editor/', SentenceEditorView.as_view(), name='sentence-editor'),
 
 ]
