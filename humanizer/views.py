@@ -9,6 +9,9 @@ from .models import Submission
 from .export_utils import generate_docx, generate_pdf
 from .serializers import SentenceEditorSerializer
 from .editor import sentence_editor
+from django.contrib.auth import authenticate
+from .serializers import RegisterSerializer, LoginSerializer
+from .models import APIKey
 
 class HumanizeTextView(APIView):
     def post(self, request, format=None):
@@ -70,4 +73,27 @@ class SentenceEditorView(APIView):
             result = sentence_editor(content, detection_evasion)
             return Response({"sentences": result}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        # generate an API key for the new user
+        api_key = APIKey.objects.create(name=user.username)
+        return Response({"api_key": str(api_key.key)}, status=status.HTTP_201_CREATED)
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = authenticate(
+            username=serializer.validated_data['username'],
+            password=serializer.validated_data['password']
+        )
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        # retrieve or create API key
+        api_key, _ = APIKey.objects.get_or_create(name=user.username)
+        return Response({"api_key": str(api_key.key)}, status=status.HTTP_200_OK)
 
