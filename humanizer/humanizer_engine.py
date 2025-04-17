@@ -1,12 +1,31 @@
+# humanizer/humanizer_engine.py
+
 import random
+from googletrans import Translator
 
+translator = Translator()
 
-def humanize_text(content, detection_evasion=False):
+def humanize_text(content, detection_evasion=False, language='en'):
     """
     Enhance the input text to appear more human-like.
-    This function performs a basic transformation plus additional modifications if detection evasion is enabled.
+    Supports detection‐evasion tweaks and optional translation to/from English.
     """
-    # Define filler phrases for natural tone
+    if not content:
+        return ""
+
+    # 1. Translate into English if needed
+    if language != 'en':
+        try:
+            content = translator.translate(content, src=language, dest='en').text
+        except Exception:
+            # fallback to original content on translation failure
+            pass
+
+    # 2. Basic humanization: lowercase, strip, then re‐capitalize
+    transformed = content.lower().strip()
+    transformed = transformed[0].upper() + transformed[1:] if transformed else transformed
+
+    # 3. Insert a random filler phrase after the third word
     filler_phrases = [
         "you know,",
         "indeed,",
@@ -14,26 +33,20 @@ def humanize_text(content, detection_evasion=False):
         "well,",
         "so,"
     ]
-
-    if not content:
-        return ""
-
-    # Basic humanization: lower-case, strip, and re-capitalize text
-    transformed = content.lower().strip()
-    transformed = transformed[0].upper() + transformed[1:]
-
-    # Insert a random filler phrase after the third word if possible
     words = transformed.split()
     if len(words) > 3:
-        filler = random.choice(filler_phrases)
-        words.insert(3, filler)
+        words.insert(3, random.choice(filler_phrases))
+    humanized = " ".join(words)
 
-    humanized_output = " ".join(words)
-
-    # Additional modifications for detection evasion mode
+    # 4. Append detection‐evasion tag if requested
     if detection_evasion:
-        # For demonstration, append a phrase; in a real system, you could implement synonym substitution or restructuring.
-        evasion_phrase = "bypassed-detector"
-        humanized_output += f" {evasion_phrase}"
+        humanized += " bypassed-detector"
 
-    return humanized_output
+    # 5. Translate back to original language if needed
+    if language != 'en':
+        try:
+            humanized = translator.translate(humanized, src='en', dest=language).text
+        except Exception:
+            pass
+
+    return humanized
