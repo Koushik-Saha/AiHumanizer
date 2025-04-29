@@ -13,7 +13,6 @@ from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, LoginSerializer
 from .models import APIKey
 from .authentication import APIKeyAuthentication
-from .throttling import APIKeyThrottle
 
 class HumanizeTextView(APIView):
     def post(self, request, format=None):
@@ -45,7 +44,6 @@ class ExportSubmissionView(APIView):
     Export a past submission as PDF or DOCX.
     """
     authentication_classes = [APIKeyAuthentication]
-    throttle_classes = [APIKeyThrottle]
 
     def get(self, request, submission_id):
         fmt = request.query_params.get('format', 'pdf').lower()
@@ -77,11 +75,11 @@ class SentenceEditorView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterView(APIView):
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        # generate an API key for the new user
         api_key = APIKey.objects.create(name=user.username)
         return Response({"api_key": str(api_key.key)}, status=status.HTTP_201_CREATED)
 

@@ -8,7 +8,7 @@ class APIKeyThrottle(SimpleRateThrottle):
     scope = 'apikey'
 
     def get_rate(self):
-        key = self.request.META.get('HTTP_X_API_KEY')
+        key = self.request.META.get('HTTP_X_API_KEY')  # Access from `self.request`
         if not key:
             return None
         try:
