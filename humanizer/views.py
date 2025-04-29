@@ -12,6 +12,8 @@ from .editor import sentence_editor
 from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, LoginSerializer
 from .models import APIKey
+from .authentication import APIKeyAuthentication
+from .throttling import APIKeyThrottle
 
 class HumanizeTextView(APIView):
     def post(self, request, format=None):
